@@ -62,5 +62,5 @@ class Client(object):
             self.connection.close()
             print("Connection closed")
 
-ins = Client()
+#ins = Client()
 
