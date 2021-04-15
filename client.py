@@ -31,7 +31,7 @@ class Client(object):
         port_entry.grid(column=2, row=2, sticky=(W,E))
         
         #Connect button
-        connectButton = ttk.Button(self.mainframe, text='Connect', command=self.connect)
+        connectButton = ttk.Button(self.mainframe, text='Connect', command=self.Connect)
         connectButton.grid(column=3, row=2, sticky=(E))
 
         #Functions
@@ -58,18 +58,19 @@ class Client(object):
         pass
     connection = None
     #Connect to the server
-    def connect(self):
+    def Connect(self):
         try:
-            self.IP = self.ip_addr.get()
-            self.port_no = self.port.get()
-            #self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #self.connection.connect((self.IP, self.port_no))
+            self.IP = str(self.ip_addr.get())
+            self.port_no = int(self.port.get())
+            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.connection.connect((self.IP, self.port_no))
+            self.connection.send('Hello'.encode())
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect(self.IP, self.port_no)
-                data = s.recv(1024)
-                self.State['text'] = "Connected to server: " + self.IP + ":" + self.port_no + "."
+                s.connect((self.IP, self.port_no))
+                s.send('Yes'.encode())
+                self.State['text'] = "Connected to server: " + self.IP + ":" + str(self.port_no) + "."
                 self.confButton['state'] = NORMAL
-            self.State['text'] = "Connected to server: " + self.IP + ":" + self.port_no + "."
+            self.State['text'] = "Connected to server: " + self.IP + ":" + str(self.port_no) + "."
             self.confButton['state'] = NORMAL
         except:
             messagebox.showerror(title='Connect error', message='An error occurred while trying to connect to the address ' + 
