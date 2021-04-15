@@ -1,9 +1,9 @@
+from funcmain import shutDown
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
-
 import socket
-import shutdown
+import commander
 
 class Client(object):
     def __init__(self):
@@ -65,11 +65,10 @@ class Client(object):
             self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.connection.connect((self.IP, self.port_no))
             self.connection.send('Hello'.encode())
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((self.IP, self.port_no))
-                s.send('Yes'.encode())
-                self.State['text'] = "Connected to server: " + self.IP + ":" + str(self.port_no) + "."
-                self.confButton['state'] = NORMAL
+
+
+            self.State['text'] = "Connected to server: " + self.IP + ":" + str(self.port_no) + "."
+            self.confButton['state'] = NORMAL
             self.State['text'] = "Connected to server: " + self.IP + ":" + str(self.port_no) + "."
             self.confButton['state'] = NORMAL
         except:
@@ -98,16 +97,18 @@ class Client(object):
 
     def command_Shutdown(self):
         self.command = 'SHUTDOWN'
-        
-        cmd = shutdown.CMD(self.root)
+        cmd = commander.CMD(self.root)
         cmd.NewInstance()
-        
-
         command = cmd.command + cmd.delay_time.get()
         print(command)
+        self.sendToServer(command)
         self.NewInstance()
         pass
-        
+    #Ham gui toi server
+    def sendToServer(self,str):
+        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connection.connect((self.IP, self.port_no))
+        self.connection.send(str.encode())
     def NewInstance(self):
         self.root.mainloop()
     def __del__(self):
