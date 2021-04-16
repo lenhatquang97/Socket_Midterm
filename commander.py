@@ -34,10 +34,9 @@ class ShutdownCMD:
         self.subframe = ttk.Frame(self.root, padding='3 3 12 12')
         self.subframe.grid(column=0, row=2)
 
-        self.button = ttk.Button(self.subframe, text='OK', command=self.confirm)
+        self.button = ttk.Button(self.subframe, text='OK', command=lambda:[self.confirm(),root.destroy()])
         self.button.grid(column=1, row=1)
     def confirm(self):
         self.isExcuted=True
-        self.root.destroy()
     def NewInstance(self):
         self.root.mainloop()

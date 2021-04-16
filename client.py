@@ -96,6 +96,8 @@ class Client(object):
         cmd.NewInstance()
         if cmd.isExcuted==False:
             cmd.command = 'Nope'
+        else:
+            cmd.command = 'SHUTDOWN'
         command = cmd.command + " " + cmd.delay_time.get()
         print(command)
         self.sendToServer(command)
