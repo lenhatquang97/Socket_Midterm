@@ -2,7 +2,9 @@ from tkinter import ttk
 from tkinter import *
 import threading
 import socket
-import funcmain
+import os
+import pyautogui
+
 class Server(object):
     def main_form(self):
         """Creates the interface window"""
@@ -35,22 +37,48 @@ class Server(object):
         s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         s.bind((addr, port))
         s.listen()
-        while True:
-            self.conn, self.target_addr = s.accept()
-            data=self.conn.recv(1024)
-            self.magicFunction(data.decode())
+        self.conn, self.target_addr = s.accept()
+        with self.conn:
+            print('Connected by:', self.target_addr)
+            while True:
+                data=self.conn.recv(1024)
+                self.magicFunction(data.decode())
+                if not data:
+                    break
     #Ham nay nhan lenh tu client
-    def magicFunction(self,str):
-        if str=='Hello':
+    def magicFunction(self,Str):
+        if Str=='Hello':
             print('Hello')
-        elif str.find('SHUTDOWN')!=-1:
-            funcmain.shutDown(str)
+        elif Str.find('SHUTDOWN')!=-1:
+            #Commands the server to shut down
+            try:
+                a = Str.split()
+                cmd = str
+                if len(a) == 2:
+                    cmd='shutdown -s -t ' + a[1]
+                else:
+                    cmd='shutdown -s'
+                os.system(cmd)
+            except Exception as e:
+                self.conn.send("Invalid command: " + str(e))
+        elif Str == 'CAPSCR':
+            #Commands the server to capture its screen and send the screenshot back to the client
+            pyautogui.screenshot().save('scr.png')
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((self.target_addr, 1025))
+                with open('scr.png', 'rb') as send:
+                    while True:
+                        data = send.read(1024)
+                        if not data:
+                            break
+                        s.sendall(data.encode())
         else:
             print('Nope')
     def Close(self):
         s.close()
-        close_it=threading.Thread.start(self.root.destroy())
+        close_it=threading.Thread(target=self.root.destroy)
         close_it.start()
+        exit(0)
 ins=Server()
 mainz=threading.Thread(target=ins.main_form)
 mainz.start()

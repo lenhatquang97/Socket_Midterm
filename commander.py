@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter import ttk
+import threading
 
-class CMD:
+class ShutdownCMD:
     def __init__(self, root):
         self.command = 'SHUTDOWN'
 
@@ -37,3 +38,6 @@ class CMD:
         self.button.grid(column=1, row=1)
     def NewInstance(self):
         self.root.mainloop()
+
+class CaptureCMD:
+    command = 'CAPSCR'

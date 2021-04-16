@@ -1,9 +1,9 @@
-from funcmain import shutDown
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 import socket
 import commander
+import threading
 
 class Client(object):
     def __init__(self):
@@ -39,7 +39,7 @@ class Client(object):
         self.func = StringVar()
         funcEntry = ttk.Combobox(self.mainframe, textvariable=self.func, width=40)
         funcEntry['values'] = ("Show running processes", "Show running apps", "Shutdown", "Screen capture"
-                                , "Keylogging", "Edit registries")
+                                , "Keylog", "Edit registries")
         funcEntry.state(["readonly"])
         funcEntry.grid(column=1, row=4, sticky=(S))
 
@@ -69,11 +69,10 @@ class Client(object):
 
             self.State['text'] = "Connected to server: " + self.IP + ":" + str(self.port_no) + "."
             self.confButton['state'] = NORMAL
-            self.State['text'] = "Connected to server: " + self.IP + ":" + str(self.port_no) + "."
-            self.confButton['state'] = NORMAL
         except:
             messagebox.showerror(title='Connect error', message='An error occurred while trying to connect to the address ' + 
-                            self.IP + ":" + self.port_no + ".")
+                            self.IP + ":" + str(self.port_no) + ".")
+            self.confButton['state'] = DISABLED
             
         
     def act(self):
@@ -86,34 +85,54 @@ class Client(object):
             self.command_Shutdown()
         elif func == "Screen capture":
             self.command_CaptureScreen()
-        elif func == "Keylogging":
+        elif func == "Keylog":
             self.command_Keylog()
         elif func == "Edit registries":
             self.command_RegEdit()
 
-    command = str
     
-    
-
     def command_Shutdown(self):
-        self.command = 'SHUTDOWN'
-        cmd = commander.CMD(self.root)
+        cmd = commander.ShutdownCMD(self.root)
         cmd.NewInstance()
-        command = cmd.command + cmd.delay_time.get()
+        command = cmd.command + " " + cmd.delay_time.get()
         print(command)
         self.sendToServer(command)
-        self.NewInstance()
+        self.CloseConnection()
         pass
+
+    def command_CaptureScreen(self):
+        cmd = commander.CaptureCMD()
+        scrshot = open("capture.png", 'wb')
+        self.sendToServer(cmd.command)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as re:
+            re.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+            re.bind((socket.gethostbyname(socket.gethostname()), 1025))
+            re.listen(1)
+            conn, addr = re.accept()
+            with conn:
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    scrshot.write(data)
+        scrshot.close()
+        self.CloseConnection()
+        pass
+
     #Ham gui toi server
-    def sendToServer(self,str):
+    def sendToServer(self,Str):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((self.IP, self.port_no))
-        self.connection.send(str.encode())
+        self.connection.send(Str.encode())
+    
     def NewInstance(self):
         self.root.mainloop()
-    def __del__(self):
+    def CloseConnection(self):
         if type(self.connection) == socket.socket:
+            self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.connection.connect((self.IP, self.port_no))
+            self.connection.send(b"")
             self.connection.close()
-            print("Connection closed")
+            
 ins = Client()
 ins.NewInstance()
