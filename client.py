@@ -94,6 +94,8 @@ class Client(object):
     def command_Shutdown(self):
         cmd = commander.ShutdownCMD(self.root)
         cmd.NewInstance()
+        if cmd.isExcuted==False:
+            cmd.command = 'Nope'
         command = cmd.command + " " + cmd.delay_time.get()
         print(command)
         self.sendToServer(command)
