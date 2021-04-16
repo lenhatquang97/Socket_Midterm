@@ -124,6 +124,24 @@ class Client(object):
         scrshot.close()
         pass
 
+    def command_ShowProcess(self):
+        cmd = 'SHWPRC'
+        print(cmd)
+        self.sendToServer(cmd)
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as re:
+            re.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+            re.bind((socket.gethostbyname(socket.gethostname()), 1026))
+            re.listen(1)
+            conn, addr = re.accept()
+            with conn:
+                while True:
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    print(data.decode(), end='')
+        pass
+
     #Ham gui toi server
     def sendToServer(self,Str):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

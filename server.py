@@ -71,6 +71,19 @@ class Server(object):
                         if not data:
                             break
                         u.sendall(data)
+        elif Str == 'SHWPRC':
+            print(Str)
+            #Commands the server to send the file consisting of running processes
+            os.system("tasklist>list.txt")
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
+                u.connect((self.target_addr[0], 1026))
+                with open('list.txt', 'r') as send:
+                    while True:
+                        data = send.read(1024)
+                        if not data:
+                            break
+                        u.sendall(data.encode())
+
         else:
             print('Nope')
     def Close(self):
