@@ -97,13 +97,15 @@ class Client(object):
         command = cmd.command + " " + cmd.delay_time.get()
         print(command)
         self.sendToServer(command)
-        self.CloseConnection()
+        
         pass
 
     def command_CaptureScreen(self):
-        cmd = commander.CaptureCMD()
+        cmd = 'CAPSCR'
+        print(cmd)
+        self.sendToServer(cmd)
         scrshot = open("capture.png", 'wb')
-        self.sendToServer(cmd.command)
+        
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as re:
             re.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
             re.bind((socket.gethostbyname(socket.gethostname()), 1025))
@@ -116,7 +118,6 @@ class Client(object):
                         break
                     scrshot.write(data)
         scrshot.close()
-        self.CloseConnection()
         pass
 
     #Ham gui toi server

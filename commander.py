@@ -38,6 +38,3 @@ class ShutdownCMD:
         self.button.grid(column=1, row=1)
     def NewInstance(self):
         self.root.mainloop()
-
-class CaptureCMD:
-    command = 'CAPSCR'

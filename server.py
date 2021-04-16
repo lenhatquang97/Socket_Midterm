@@ -9,7 +9,7 @@ class Server(object):
     def main_form(self):
         """Creates the interface window"""
         self.root = Tk()
-        self.root.title("Client")
+        self.root.title("Server")
 
         #mainframe
         self.mainframe = ttk.Frame(self.root, padding="100 100 250 250")
@@ -37,14 +37,12 @@ class Server(object):
         s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         s.bind((addr, port))
         s.listen()
-        self.conn, self.target_addr = s.accept()
-        with self.conn:
-            print('Connected by:', self.target_addr)
-            while True:
-                data=self.conn.recv(1024)
-                self.magicFunction(data.decode())
-                if not data:
-                    break
+        while True:
+            self.conn, self.target_addr = s.accept()
+            data=self.conn.recv(1024)
+            if not data:
+                break
+            self.magicFunction(data.decode())
     #Ham nay nhan lenh tu client
     def magicFunction(self,Str):
         if Str=='Hello':
@@ -62,23 +60,23 @@ class Server(object):
             except Exception as e:
                 self.conn.send("Invalid command: " + str(e))
         elif Str == 'CAPSCR':
+            print(Str)
             #Commands the server to capture its screen and send the screenshot back to the client
             pyautogui.screenshot().save('scr.png')
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((self.target_addr, 1025))
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
+                u.connect((self.target_addr[0], 1025))
                 with open('scr.png', 'rb') as send:
                     while True:
                         data = send.read(1024)
                         if not data:
                             break
-                        s.sendall(data.encode())
+                        u.sendall(data)
         else:
             print('Nope')
     def Close(self):
         s.close()
         close_it=threading.Thread(target=self.root.destroy)
         close_it.start()
-        exit(0)
 ins=Server()
 mainz=threading.Thread(target=ins.main_form)
 mainz.start()
