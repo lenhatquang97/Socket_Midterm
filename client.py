@@ -108,7 +108,7 @@ class Client(object):
         
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as re:
             re.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-            re.bind((socket.gethostbyname(socket.gethostname()), 1025))
+            re.bind((socket.gethostbyname(socket.gethostname()), 1026))
             re.listen(1)
             conn, addr = re.accept()
             with conn:

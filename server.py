@@ -64,7 +64,7 @@ class Server(object):
             #Commands the server to capture its screen and send the screenshot back to the client
             pyautogui.screenshot().save('scr.png')
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
-                u.connect((self.target_addr[0], 1025))
+                u.connect((self.target_addr[0], 1026))
                 with open('scr.png', 'rb') as send:
                     while True:
                         data = send.read(1024)
