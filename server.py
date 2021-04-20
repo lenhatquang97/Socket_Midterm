@@ -4,7 +4,15 @@ import threading
 import socket
 import os
 import pyautogui
-
+import registry
+from winreg import *
+mp={
+    'HKEY_CLASSES_ROOT':HKEY_CLASSES_ROOT,
+    'HKEY_CURRENT_CONFIG':HKEY_CURRENT_CONFIG,
+    'HKEY_CURRENT_USER':HKEY_CURRENT_USER,
+    'HKEY_USERS':HKEY_USERS,
+    'HKEY_LOCAL_MACHINE':HKEY_LOCAL_MACHINE
+}
 class Server(object):
     def main_form(self):
         """Creates the interface window"""
@@ -40,18 +48,19 @@ class Server(object):
         while True:
             self.conn, self.target_addr = s.accept()
             data=self.conn.recv(1024)
+            print(data)
             if not data:
                 break
-            self.magicFunction(data.decode())
+            self.magicFunction(data)
     #Ham nay nhan lenh tu client
     def magicFunction(self,Str):
-        if Str=='Hello':
+        if Str.decode()=='Hello':
             print('Hello')
-        elif Str.find('SHUTDOWN')!=-1:
+        elif Str.decode().find('SHUTDOWN')!=-1:
             #Commands the server to shut down
             try:
-                a = Str.split()
-                cmd = str
+                a = Str.decode().split()
+                cmd = Str.decode()
                 if len(a) == 2:
                     cmd='shutdown -s -t ' + a[1]
                 else:
@@ -59,8 +68,8 @@ class Server(object):
                 os.system(cmd)
             except Exception as e:
                 self.conn.send("Invalid command: " + str(e))
-        elif Str == 'CAPSCR':
-            print(Str)
+        elif Str.decode() == 'CAPSCR':
+            print(Str.decode())
             #Commands the server to capture its screen and send the screenshot back to the client
             pyautogui.screenshot().save('scr.png')
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
@@ -71,8 +80,8 @@ class Server(object):
                         if not data:
                             break
                         u.sendall(data)
-        elif Str == 'SHWPRC':
-            print(Str)
+        elif Str.decode() == 'SHWPRC':
+            print(Str.decode())
             #Commands the server to send the file consisting of running processes
             os.system("tasklist>list.txt")
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
@@ -83,9 +92,52 @@ class Server(object):
                         if not data:
                             break
                         u.sendall(data.encode())
-
+        elif Str.decode().find('GETVALUE')!=-1:
+            print(Str.decode())
+            arr = Str.decode().split(' ')
+            brr = arr[1].split('\\',1)
+            self.conn.send(str(registry.getValue(mp[brr[0]],brr[1],arr[2])).encode())
+        elif Str.decode().find('DELETEVALUE')!=-1:
+            print(Str.decode())
+            arr = Str.decode().split(' ')
+            brr = arr[1].split('\\',1)
+            if registry.deleteValue(mp[brr[0]],brr[1],arr[2]):
+                self.conn.send('Thao tác thành công'.encode())
+            else:
+                self.conn.send('Không thành công'.encode())
+        elif Str.decode().find('CREATEKEY')!=-1:
+            print(Str.decode())
+            arr = Str.decode().split(' ')
+            if registry.createKey(arr[1])==True:
+                self.conn.send('Thao tác thành công'.encode())
+            else:
+                self.conn.send('Không thành công'.encode())
+        elif Str.decode().find('DELETEKEY')!=-1:
+            print(Str.decode())
+            arr = Str.decode().split(' ')
+            if registry.deleteKey(arr[1])==True:
+                self.conn.send('Thao tác thành công'.encode())
+            else:
+                self.conn.send('Không thành công'.encode())
+        elif Str.decode().find('SETVALUE')!=-1:
+            print(Str.decode())
+            arr = Str.decode().split('%')
+            brr = arr[1].split('\\',1)
+            try:
+                if registry.setValue(mp[brr[0]],brr[1],arr[2],arr[3],arr[4]) == True:
+                    self.conn.send('Thao tác thành công'.encode())
+                else:
+                    self.conn.send('Không thành công'.encode())
+            except:
+                self.conn.send('Không thành công'.encode())
+            
         else:
-            print('Nope')
+            f_bin=open('testing.reg','wb+')
+            f_bin.write(Str)
+            f_bin.close()
+            if len(Str)<1024:
+                registry.importRegistry(filepath=r'E:\Python\Socket_Midterm\testing.reg')
+                
     def Close(self):
         s.close()
         close_it=threading.Thread(target=self.root.destroy)

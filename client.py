@@ -4,7 +4,7 @@ from tkinter import ttk
 import socket
 import commander
 import threading
-
+import registerGUI
 class Client(object):
     def __init__(self):
         """Creates the interface window"""
@@ -141,6 +141,10 @@ class Client(object):
                         break
                     print(data.decode(), end='')
         pass
+    def command_RegEdit(self):
+        regEdit = registerGUI.RegistryWindow(Toplevel(),self.IP,self.port_no)
+        regEdit.loadReg()
+        
 
     #Ham gui toi server
     def sendToServer(self,Str):
