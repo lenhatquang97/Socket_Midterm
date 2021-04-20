@@ -3,7 +3,6 @@ from tkinter import ttk
 import threading
 import socket
 from tkinter.filedialog import askopenfilename
-import registry
 # pip install pillow
 from PIL import Image, ImageTk
 
