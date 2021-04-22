@@ -6,12 +6,11 @@ import socket
 from PIL import Image, ImageTk
 from pyautogui import scroll
 class Process(Frame):
-    def __init__(self,master,ip,port_no):
+    def __init__(self,master, conn:socket.socket):
         Frame.__init__(self, master)
         self.master=master
         self.master.resizable(FALSE, FALSE)
-        self.ip=ip
-        self.port_no=port_no
+        self.conn = conn
     
         killButton = ttk.Button(self.master, text='Kill',command=self.eventKillProcess)
         killButton.place(x=5,y=5,height=60)
@@ -46,6 +45,7 @@ class Process(Frame):
         
 
 
+
     def loadKeyLog(self):
         self.master.wm_title("Process")
         self.master.geometry('510x300')
@@ -58,5 +58,4 @@ class Process(Frame):
         pass 
     def eventStartProcess(self):
         pass
-ins = Process(Tk(),'192.168.137.1',1025)
-ins.loadKeyLog()
+ins = Process(Tk())

