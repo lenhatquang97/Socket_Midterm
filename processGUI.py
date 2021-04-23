@@ -2,13 +2,14 @@ from tkinter import *
 from tkinter import ttk
 import threading
 import socket
+from time import sleep
 # pip install pillow
 from PIL import Image, ImageTk
 from pyautogui import scroll
 class Kill(Frame):
     def __init__(self,master,conn:socket.socket,function='KILL'):
         Frame.__init__(self, master)
-        self.master=master
+        self.master = master
         self.pid = StringVar()
         self.master.resizable(FALSE, FALSE)
 
@@ -23,14 +24,44 @@ class Kill(Frame):
         self.master.geometry('450x50')
         self.master.mainloop()
     def sendProcess(self):
+        self.conn.send(("KILL " + self.pid.get()).encode())
+        sleep(5)
+        data = self.conn.recv(8)
+        if data == 'TRUE':
+            self.conn.send('SHWPRC'.encode())
+            with self.conn:
+                while True:
+                    data = self.conn.recv(1024)
+                    if not data:
+                        break
+                    print(data.decode(), end='')
+            print("")
+        else:
+            print("Failed to kill process.")
         pass
 class Start(Kill):
     def __init__(self, master, conn,function):
         super().__init__(master, conn, function=function)
+    def sendProcess(self):
+        self.conn.send(("START " + self.pid.get()).encode())
+        sleep(5)
+        data = self.conn.recv(8)
+        if data == 'TRUE':
+            self.conn.send('SHWPRC'.encode())
+            with self.conn:
+                while True:
+                    data = self.conn.recv(1024)
+                    if not data:
+                        break
+                    print(data.decode(), end='')
+            print("")
+        else:
+            print("Failed to start process.")
+        pass
 class Process(Frame):
     def __init__(self,master, conn:socket.socket):
         Frame.__init__(self, master)
-        self.master=master
+        self.master = Toplevel(master)
         self.master.resizable(FALSE, FALSE)
         self.conn = conn
     
@@ -39,34 +70,10 @@ class Process(Frame):
 
         watchButton = ttk.Button(self.master, text='Watch',command=self.eventWatchProcess)
         watchButton.place(x=130,y=5,height=60)
-        
-        deleteButton = ttk.Button(self.master, text='Delete',command=self.eventDeleteProcess)
-        deleteButton.place(x=255,y=5,height=60)
 
         startButton = ttk.Button(self.master, text='Start',command=self.eventStartProcess)
         startButton.place(x=380,y=5,height=60)
         #file status
-
-        self.treeViewProcess=ttk.Treeview(self.master)
-        s = ttk.Style()
-        s.configure('Treeview', rowheight=30)
-        
-        self.treeViewProcess["columns"]=("one","two")
-        self.treeViewProcess.column("#0",width=165,anchor=CENTER)
-        self.treeViewProcess.column("one",width=165,anchor=CENTER)
-        self.treeViewProcess.column("two",width=165,anchor=CENTER)
-        self.treeViewProcess.heading("#0",text='Name Process')
-        self.treeViewProcess.heading("one",text='ID Process')
-        self.treeViewProcess.heading("two",text='Count Threads')
-
-        #Mau
-        self.treeViewProcess.insert("",'end',text='notepad.exe',values=("1234",'12'))
-
-        self.treeViewProcess.place(x=5, y=80,height=200)
-
-        
-
-
 
     def loadProcess(self):
         self.master.wm_title("Process")
@@ -76,11 +83,7 @@ class Process(Frame):
         ins=Kill(Toplevel(),self.conn)
         ins.load()
     def eventWatchProcess(self):
-        pass
-    def eventDeleteProcess(self):
-        pass 
+        self.conn.send("SHWPRC")
     def eventStartProcess(self):
         ins=Start(Toplevel(),self.conn,'START')
         ins.load('Start')
-ins = Process(Tk(),conn=socket.socket)
-ins.loadProcess()

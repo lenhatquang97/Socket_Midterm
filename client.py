@@ -142,6 +142,7 @@ class Client(object):
                     if not data:
                         break
                     print(data.decode(), end='')
+        print("")
         pass
     def command_RegEdit(self):
         regEdit = registerGUI.RegistryWindow(Toplevel(),self.IP,self.port_no)
