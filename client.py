@@ -6,6 +6,7 @@ import commander
 import threading
 from registerGUI import *
 import keylogGUI
+import processGUI
 from time import sleep
 class Client(object):
     def __init__(self):
@@ -114,7 +115,7 @@ class Client(object):
         
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as re:
             re.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-            re.bind((socket.gethostbyname(socket.gethostname()), 1026))
+            re.bind((socket.gethostbyname(socket.gethostname()), 1025))
             re.listen(1)
             conn, addr = re.accept()
             with conn:
@@ -127,22 +128,9 @@ class Client(object):
         pass
 
     def command_ShowProcess(self):
-        cmd = 'SHWPRC'
-        print(cmd)
-        self.sendToServer(cmd)
-
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as re:
-            re.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-            re.bind((socket.gethostbyname(socket.gethostname()), 1026))
-            re.listen(1)
-            conn, addr = re.accept()
-            with conn:
-                while True:
-                    data = conn.recv(1024)
-                    if not data:
-                        break
-                    print(data.decode(), end='')
-        pass
+        ins = processGUI.Process(self.root,self.IP,self.port_no)
+        processThread=threading.Thread(target=ins.loadProcess())
+        processThread.start()
     def command_RegEdit(self):
         regEdit = RegistryWindow(Toplevel(),self.IP,self.port_no)
         regeditThread = threading.Thread(target=regEdit.loadReg(res='750x500'))

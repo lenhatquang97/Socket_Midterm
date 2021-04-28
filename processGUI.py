@@ -6,14 +6,16 @@ from time import sleep
 # pip install pillow
 from PIL import Image, ImageTk
 from pyautogui import scroll
+import re 
+
 class Kill(Frame):
-    def __init__(self,master,conn:socket.socket,function='KILL'):
+    def __init__(self,master,IP,port_no,function='KILL'):
         Frame.__init__(self, master)
-        self.master = master
+        self.master = Toplevel(master)
         self.pid = StringVar()
         self.master.resizable(FALSE, FALSE)
-
-        self.conn=conn
+        self.IP=IP
+        self.port_no=port_no
         self.entryInput = ttk.Entry(self.master,width=30,textvariable=self.pid)
         self.entryInput.place(x=5,y=5)
 
@@ -24,8 +26,9 @@ class Kill(Frame):
         self.master.geometry('450x50')
         self.master.mainloop()
     def sendProcess(self):
+        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.conn.connect((self.IP, self.port_no))
         self.conn.send(("KILL " + self.pid.get()).encode())
-        sleep(5)
         data = self.conn.recv(8)
         if data == 'TRUE':
             self.conn.send('SHWPRC'.encode())
@@ -40,9 +43,11 @@ class Kill(Frame):
             print("Failed to kill process.")
         pass
 class Start(Kill):
-    def __init__(self, master, conn,function):
-        super().__init__(master, conn, function=function)
+    def __init__(self, master,IP,port_no,function):
+        super().__init__(master,IP,port_no, function=function)
     def sendProcess(self):
+        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.conn.connect((self.IP, self.port_no))
         self.conn.send(("START " + self.pid.get()).encode())
         sleep(5)
         data = self.conn.recv(8)
@@ -59,11 +64,12 @@ class Start(Kill):
             print("Failed to start process.")
         pass
 class Process(Frame):
-    def __init__(self,master, conn:socket.socket):
+    def __init__(self,master, IP, port_no):
         Frame.__init__(self, master)
         self.master = Toplevel(master)
         self.master.resizable(FALSE, FALSE)
-        self.conn = conn
+        self.IP=IP
+        self.port_no=port_no
     
         killButton = ttk.Button(self.master, text='Kill',command=self.eventKillProcess)
         killButton.place(x=5,y=5,height=60)
@@ -71,19 +77,66 @@ class Process(Frame):
         watchButton = ttk.Button(self.master, text='Watch',command=self.eventWatchProcess)
         watchButton.place(x=130,y=5,height=60)
 
+        deleteButton = ttk.Button(self.master, text='Delete',command=self.eventDeleteProcess)
+        deleteButton.place(x=255,y=5,height=60)
+
         startButton = ttk.Button(self.master, text='Start',command=self.eventStartProcess)
         startButton.place(x=380,y=5,height=60)
         #file status
+        
+        self.treeViewProcess=ttk.Treeview(self.master)
+        s = ttk.Style()
+        s.configure('Treeview', rowheight=30)
+        
+        self.treeViewProcess["columns"]=("one","two")
+        self.treeViewProcess.column("#0",width=165,anchor=CENTER)
+        self.treeViewProcess.column("one",width=165,anchor=CENTER)
+        self.treeViewProcess.column("two",width=165,anchor=CENTER)
+        self.treeViewProcess.heading("#0",text='Name Process')
+        self.treeViewProcess.heading("one",text='ID Process')
+        self.treeViewProcess.heading("two",text='Count Threads')
+
+        #Mau
+        #for i in range(0,10,1):
+            #self.treeViewProcess.insert("",'end',text='notepad.exe',values=("1234",str(i)))
+
+        self.treeViewProcess.place(x=5, y=80,height=200)
 
     def loadProcess(self):
         self.master.wm_title("Process")
         self.master.geometry('510x300')
         self.master.mainloop()
     def eventKillProcess(self):
-        ins=Kill(Toplevel(),self.conn)
+        print('Abc')
+        ins=Kill(self.master,self.IP,self.port_no)
         ins.load()
     def eventWatchProcess(self):
-        self.conn.send("SHWPRC")
+        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.conn.connect((self.IP, self.port_no))
+        self.conn.send("SHWPRC".encode())
+        count = 0
+        while True:
+            data = self.conn.recv(1024)
+            if not data:
+                break
+            if data.decode().find('STOPRIGHTNOW')!=-1:
+                break
+            if len(str(data.decode()))!=1 and str(data.decode()).find('ThreadCount')==-1:
+                arr=re.sub(' +', ' ',data.replace(b'\x00', b'').decode('utf-8')).split(' ')
+                print(arr)
+                chain=''
+                for i in range(0,len(arr)-3,1):
+                    chain+=arr[i]
+                if arr[1]!='ProcessId' and arr[2]!='ThreadCount':
+                    self.treeViewProcess.insert("",'end',text=chain,values=(str(arr[len(arr)-3]),str(arr[len(arr)-2])))
+                chain=''
+            #print(data.decode())
+            count+=1
+        print('bump')
+        
+    def eventDeleteProcess(self):
+        pass
     def eventStartProcess(self):
-        ins=Start(Toplevel(),self.conn,'START')
+        print('GHI')
+        ins=Start(self.master,self.IP,self.port_no,'START')
         ins.load('Start')

