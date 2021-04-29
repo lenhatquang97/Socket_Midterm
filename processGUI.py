@@ -6,8 +6,7 @@ from time import sleep
 # pip install pillow
 from PIL import Image, ImageTk
 from pyautogui import scroll
-import re 
-
+import re
 class Kill(Frame):
     def __init__(self,master,IP,port_no,function='KILL'):
         Frame.__init__(self, master)
@@ -17,6 +16,10 @@ class Kill(Frame):
         self.IP=IP
         self.port_no=port_no
         self.entryInput = ttk.Entry(self.master,width=30,textvariable=self.pid)
+        if function=='START':
+            self.entryInput.insert(0,'ProcessName')
+        elif function=='KILL':
+            self.entryInput.insert(0,'PID')
         self.entryInput.place(x=5,y=5)
 
         clickButton = ttk.Button(self.master, text=function,command=self.sendProcess)
@@ -25,23 +28,18 @@ class Kill(Frame):
         self.master.wm_title(name)
         self.master.geometry('450x50')
         self.master.mainloop()
+        self.master.destroy()
     def sendProcess(self):
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
         self.conn.send(("KILL " + self.pid.get()).encode())
         data = self.conn.recv(8)
-        if data == 'TRUE':
-            self.conn.send('SHWPRC'.encode())
-            with self.conn:
-                while True:
-                    data = self.conn.recv(1024)
-                    if not data:
-                        break
-                    print(data.decode(), end='')
-            print("")
+        if data.decode() == 'TRUE':
+            global PID_Deleted
+            PID_Deleted=self.pid.get()
+            self.master.quit()
         else:
             print("Failed to kill process.")
-        pass
 class Start(Kill):
     def __init__(self, master,IP,port_no,function):
         super().__init__(master,IP,port_no, function=function)
@@ -49,17 +47,10 @@ class Start(Kill):
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
         self.conn.send(("START " + self.pid.get()).encode())
-        sleep(5)
         data = self.conn.recv(8)
-        if data == 'TRUE':
-            self.conn.send('SHWPRC'.encode())
-            with self.conn:
-                while True:
-                    data = self.conn.recv(1024)
-                    if not data:
-                        break
-                    print(data.decode(), end='')
-            print("")
+        if data.decode() == 'TRUE':
+            print('OK')
+            self.master.quit()
         else:
             print("Failed to start process.")
         pass
@@ -107,14 +98,14 @@ class Process(Frame):
         self.master.geometry('510x300')
         self.master.mainloop()
     def eventKillProcess(self):
-        print('Abc')
         ins=Kill(self.master,self.IP,self.port_no)
         ins.load()
+        print('None')
+        self.deleteInTreeView(str(PID_Deleted))
     def eventWatchProcess(self):
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
         self.conn.send("SHWPRC".encode())
-        count = 0
         while True:
             data = self.conn.recv(1024)
             if not data:
@@ -131,12 +122,15 @@ class Process(Frame):
                     self.treeViewProcess.insert("",'end',text=chain,values=(str(arr[len(arr)-3]),str(arr[len(arr)-2])))
                 chain=''
             #print(data.decode())
-            count+=1
-        print('bump')
-        
     def eventDeleteProcess(self):
-        pass
+        selected_items = self.treeViewProcess.get_children()
+        for child in selected_items:
+            self.treeViewProcess.delete(child)
     def eventStartProcess(self):
-        print('GHI')
         ins=Start(self.master,self.IP,self.port_no,'START')
         ins.load('Start')
+    def deleteInTreeView(self,PID):
+        selected_items = self.treeViewProcess.get_children()
+        for child in selected_items:
+            if str(self.treeViewProcess.item(child)['values'][0]) == PID:
+                self.treeViewProcess.delete(child)

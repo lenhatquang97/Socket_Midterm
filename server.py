@@ -148,15 +148,13 @@ class Server(object):
             PID = int(Str.decode().split()[1])
             try:
                 os.kill(PID, 9)
-                sleep(5)
                 self.conn.send('TRUE'.encode())
             except:
                 self.conn.send('FALSE'.encode())
                 pass
         elif Str.decode().find('START') != -1:
             try:
-                os.system(Str.decode().split()[1])
-                sleep(5)
+                os.system(Str.decode())
                 self.conn.send('TRUE'.encode())
             except:
                 self.conn.send('FALSE'.encode())
