@@ -1,14 +1,9 @@
 from tkinter import *
 from tkinter import ttk
-from tkinter import messagebox
-import threading
 import socket
-from time import sleep
 # pip install pillow
-from PIL import Image, ImageTk
 from pyautogui import scroll
 import re
-import os
 mpApplication={}
 #os.system('taskkill /f /im brave.exe')
 class Kill(Frame):
@@ -40,7 +35,7 @@ class Kill(Frame):
                 flag=key
                 break
         if flag == 'Nopeeeeeeeeee':
-            print("Failed to kill process.")
+            print("Failed to kill app.")
             return False
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
@@ -52,6 +47,7 @@ class Kill(Frame):
             self.master.quit()
         else:
             print("Failed to kill process.")
+        return True
 class Start(Kill):
     def __init__(self, master,IP,port_no,function):
         super().__init__(master,IP,port_no, function=function)
@@ -74,10 +70,10 @@ class App(Frame):
         self.IP=IP
         self.port_no=port_no
     
-        killButton = ttk.Button(self.master, text='Kill',command=self.eventKillProcess)
+        killButton = ttk.Button(self.master, text='Kill',command=self.eventKillApp)
         killButton.place(x=5,y=5,height=60)
 
-        watchButton = ttk.Button(self.master, text='Watch',command=self.eventWatchProcess)
+        watchButton = ttk.Button(self.master, text='Watch',command=self.eventWatchApp)
         watchButton.place(x=130,y=5,height=60)
 
         deleteButton = ttk.Button(self.master, text='Delete',command=self.eventDeleteAppProcess)
@@ -109,12 +105,12 @@ class App(Frame):
         self.master.wm_title("App Manager")
         self.master.geometry('510x300')
         self.master.mainloop()
-    def eventKillProcess(self):
+    def eventKillApp(self):
         ins=Kill(self.master,self.IP,self.port_no)
         ins.load()
         self.deleteInTreeView(str(PID_Deleted))
     #Chinh sua xong
-    def eventWatchProcess(self):
+    def eventWatchApp(self):
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
         self.conn.send("SHWPRC".encode())
