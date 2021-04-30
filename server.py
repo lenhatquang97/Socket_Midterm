@@ -40,6 +40,7 @@ class Server(object):
     def Connect(self):
         port = 1025
         addr = socket.gethostbyname(socket.gethostname())
+        Label(self.mainframe,text=addr+':'+str(port)).grid(column=1,row=2)
         print(addr, port)
         self.connectButton['text'] = 'Close'
         self.connectButton['command'] = self.Close
