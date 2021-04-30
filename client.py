@@ -7,6 +7,8 @@ import threading
 from registerGUI import *
 import keylogGUI
 import processGUI
+import appGUI
+import loadimage
 from time import sleep
 class Client(object):
     def __init__(self):
@@ -112,24 +114,26 @@ class Client(object):
         print(cmd)
         self.sendToServer(cmd)
         scrshot = open("capture.png", 'wb')
-        
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as re:
-            re.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-            re.bind((socket.gethostbyname(socket.gethostname()), 1025))
-            re.listen(1)
-            conn, addr = re.accept()
-            with conn:
-                while True:
-                    data = conn.recv(1024)
-                    if not data:
-                        break
-                    scrshot.write(data)
+        print('Checkpoint 1')
+        while True:
+            data = self.connection.recv(1024)
+            print(len(data))
+            if len(data) < 1024:
+                scrshot.write(data)
+                break
+            scrshot.write(data)
+        print('ah shit')
+        ins = loadimage.WindowScreenShot('capture.png',Toplevel(self.root))
+        scrThread =threading.Thread(target=ins.loadImg())
+        scrThread.start()
         scrshot.close()
-        pass
-
     def command_ShowProcess(self):
         ins = processGUI.Process(self.root,self.IP,self.port_no)
         processThread=threading.Thread(target=ins.loadProcess())
+        processThread.start()
+    def command_ShowApps(self):
+        ins = appGUI.App(self.root,self.IP,self.port_no)
+        processThread=threading.Thread(target=ins.loadApp())
         processThread.start()
     def command_RegEdit(self):
         regEdit = RegistryWindow(Toplevel(),self.IP,self.port_no)

