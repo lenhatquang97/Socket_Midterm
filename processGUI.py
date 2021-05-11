@@ -49,7 +49,6 @@ class Start(Kill):
         self.conn.send(("START " + self.pid.get()).encode())
         data = self.conn.recv(8)
         if data.decode() == 'TRUE':
-            print('OK')
             self.master.quit()
         else:
             print("Failed to start process.")
@@ -100,7 +99,6 @@ class Process(Frame):
     def eventKillProcess(self):
         ins=Kill(self.master,self.IP,self.port_no)
         ins.load()
-        print('None')
         self.deleteInTreeView(str(PID_Deleted))
     def eventWatchProcess(self):
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

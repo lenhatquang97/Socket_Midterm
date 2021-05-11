@@ -94,7 +94,6 @@ class Server(object):
                         s.sendall(data)
             '''
         elif Str.decode() == 'SHWPRC':
-            print(Str.decode())
             #Commands the server to send the file consisting of running processes
             os.system("wmic process get Name, ProcessId, ThreadCount >list.txt")
             send = open('list.txt', 'r')
@@ -117,12 +116,10 @@ class Server(object):
                         u.sendall(data.encode())
             '''
         elif Str.decode().find('GETVALUE')!=-1:
-            print(Str.decode())
             arr = Str.decode().split(' ')
             brr = arr[1].split('\\',1)
             self.conn.send(str(registry.getValue(mp[brr[0]],brr[1],arr[2])).encode())
         elif Str.decode().find('DELETEVALUE')!=-1:
-            print(Str.decode())
             arr = Str.decode().split(' ')
             brr = arr[1].split('\\',1)
             if registry.deleteValue(mp[brr[0]],brr[1],arr[2]):
@@ -130,21 +127,18 @@ class Server(object):
             else:
                 self.conn.send('Failure'.encode())
         elif Str.decode().find('CREATEKEY')!=-1:
-            print(Str.decode())
             arr = Str.decode().split(' ')
             if registry.createKey(arr[1])==True:
                 self.conn.send('Completed'.encode())
             else:
                 self.conn.send('Failure'.encode())
         elif Str.decode().find('DELETEKEY')!=-1:
-            print(Str.decode())
             arr = Str.decode().split(' ')
             if registry.deleteKey(arr[1])==True:
                 self.conn.send('Completed'.encode())
             else:
                 self.conn.send('Failed'.encode())
         elif Str.decode().find('SETVALUE')!=-1:
-            print(Str.decode())
             arr = Str.decode().split('%')
             brr = arr[1].split('\\',1)
             try:

@@ -114,15 +114,12 @@ class Client(object):
         print(cmd)
         self.sendToServer(cmd)
         scrshot = open("capture.png", 'wb')
-        print('Checkpoint 1')
         while True:
             data = self.connection.recv(1024)
-            print(len(data))
             if len(data) < 1024:
                 scrshot.write(data)
                 break
             scrshot.write(data)
-        print('ah shit')
         ins = loadimage.WindowScreenShot('capture.png',Toplevel(self.root))
         scrThread =threading.Thread(target=ins.loadImg())
         scrThread.start()

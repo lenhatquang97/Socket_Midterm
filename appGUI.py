@@ -29,12 +29,12 @@ class Kill(Frame):
         self.master.mainloop()
         self.master.destroy()
     def sendProcess(self):
-        flag='Nopeeeeeeeeee'
+        flag='Nope'
         for key in mpApplication:
             if mpApplication[key][0]==self.pid.get():
                 flag=key
                 break
-        if flag == 'Nopeeeeeeeeee':
+        if flag == 'Nope':
             print("Failed to kill app.")
             return False
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -57,7 +57,6 @@ class Start(Kill):
         self.conn.send(("START " + self.pid.get()).encode())
         data = self.conn.recv(8)
         if data.decode() == 'TRUE':
-            print('OK')
             self.master.quit()
         else:
             print("Failed to start process.")
@@ -122,7 +121,6 @@ class App(Frame):
                 break
             if len(str(data.decode()))!=1 and str(data.decode()).find('ThreadCount')==-1:
                 arr=re.sub(' +', ' ',data.replace(b'\x00', b'').decode('utf-8')).split(' ')
-                print(arr)
                 chain=''
                 for i in range(0,len(arr)-3,1):
                     chain+=arr[i]

@@ -43,7 +43,6 @@ def readKey(default_value,reg_path):
     num_of_values = QueryInfoKey(hosts_key)[1]
     for i in range(num_of_values):
         values = EnumValue(hosts_key, i)
-        print(values)
 #set value value entry from registry key
 def setValue(default_value,reg_path,name,value,type):
     try:

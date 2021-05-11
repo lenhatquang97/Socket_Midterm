@@ -31,7 +31,7 @@ class RegistryWindow(Frame):
         sendButton = ttk.Button(self.master, text='Gửi',command=self.sendRegFileFunction)
         sendButton.place(x=self.browseEntry.winfo_reqwidth()+10,y=self.browseEntry.winfo_depth()+10,height=81)
 
-        ttk.Label(self.master, text='Sửa giá trị').place(x=5,y=125)
+        ttk.Label(self.master, text='Edit value').place(x=5,y=125)
 
         #Chon chuc nang
         self.vlist = ["Get value", "Set value", "Delete value","Create key", "Delete key"]
@@ -110,7 +110,6 @@ class RegistryWindow(Frame):
                 self.comboData.place_forget()
             if self.keyEntry.winfo_ismapped():
                 self.keyEntry.place_forget()
-        print(str(self.combo.get()))
     
     def sendRegFileFunction(self):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -118,7 +117,6 @@ class RegistryWindow(Frame):
         another_f = open (filename, "rb")
         l = another_f.read(1024)
         while (l):
-            print(l)
             self.connection.send(l)
             l = another_f.read(1024)
         another_f.close()
