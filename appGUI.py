@@ -108,8 +108,13 @@ class App(Frame):
         ins=Kill(self.master,self.IP,self.port_no)
         ins.load()
         self.deleteInTreeView(str(PID_Deleted))
+    def eventDeleteAppProcess(self):
+        selected_items = self.treeViewProcess.get_children()
+        for child in selected_items:
+            self.treeViewProcess.delete(child)
     #Chinh sua xong
     def eventWatchApp(self):
+        self.eventDeleteAppProcess()
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
         self.conn.send("SHWPRC".encode())
@@ -131,10 +136,7 @@ class App(Frame):
         for key in mpApplication:
             self.treeViewProcess.insert("",'end',text=key,values=(mpApplication[key][0],mpApplication[key][1]))
     #Giu nguyen
-    def eventDeleteAppProcess(self):
-        selected_items = self.treeViewProcess.get_children()
-        for child in selected_items:
-            self.treeViewProcess.delete(child)
+    
     def eventStartApp(self):
         ins=Start(self.master,self.IP,self.port_no,'START')
         ins.load('Start')

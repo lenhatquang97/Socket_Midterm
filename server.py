@@ -39,6 +39,7 @@ class Server(object):
         con.start()
     def Connect(self):
         port = 1025
+        #addr = '14.230.23.93'
         addr = socket.gethostbyname(socket.gethostname())
         Label(self.mainframe,text=addr+':'+str(port)).grid(column=1,row=2)
         print(addr, port)
@@ -81,18 +82,6 @@ class Server(object):
                     break
                 self.conn.sendall(data)
         
-            '''
-            #Commands the server to capture its screen and send the screenshot back to the client
-            pyautogui.screenshot().save('scr.png')
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((self.target_addr[0], 1025))
-                with open('scr.png', 'rb') as send:
-                    while True:
-                        data = send.read(1024)
-                        if not data:
-                            break
-                        s.sendall(data)
-            '''
         elif Str.decode() == 'SHWPRC':
             #Commands the server to send the file consisting of running processes
             os.system("wmic process get Name, ProcessId, ThreadCount >list.txt")
@@ -104,17 +93,6 @@ class Server(object):
                     self.conn.send('STOPRIGHTNOW'.encode())
                     break
                 self.conn.sendall(data.strip().encode())
-            
-            '''
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as u:
-                u.connect((self.target_addr[0], 1025))
-                with open('list.txt', 'r') as send:
-                    while True:
-                        data = send.read(1024)
-                        if not data:
-                            break
-                        u.sendall(data.encode())
-            '''
         elif Str.decode().find('GETVALUE')!=-1:
             arr = Str.decode().split(' ')
             brr = arr[1].split('\\',1)

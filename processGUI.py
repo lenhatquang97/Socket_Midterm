@@ -100,7 +100,12 @@ class Process(Frame):
         ins=Kill(self.master,self.IP,self.port_no)
         ins.load()
         self.deleteInTreeView(str(PID_Deleted))
+    def eventDeleteProcess(self):
+        selected_items = self.treeViewProcess.get_children()
+        for child in selected_items:
+            self.treeViewProcess.delete(child)
     def eventWatchProcess(self):
+        self.eventDeleteProcess()
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
         self.conn.send("SHWPRC".encode())
@@ -120,10 +125,6 @@ class Process(Frame):
                     self.treeViewProcess.insert("",'end',text=chain,values=(str(arr[len(arr)-3]),str(arr[len(arr)-2])))
                 chain=''
             #print(data.decode())
-    def eventDeleteProcess(self):
-        selected_items = self.treeViewProcess.get_children()
-        for child in selected_items:
-            self.treeViewProcess.delete(child)
     def eventStartProcess(self):
         ins=Start(self.master,self.IP,self.port_no,'START')
         ins.load('Start')
