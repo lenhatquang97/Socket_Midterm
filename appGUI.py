@@ -29,17 +29,9 @@ class Kill(Frame):
         self.master.mainloop()
         self.master.destroy()
     def sendProcess(self):
-        flag='Nope'
-        for key in mpApplication:
-            if mpApplication[key][0]==self.pid.get():
-                flag=key
-                break
-        if flag == 'Nope':
-            print("Failed to kill app.")
-            return False
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
-        self.conn.send(("KILLAPP" + flag).encode())
+        self.conn.send(("KILLAPP " + self.pid.get()).encode())
         data = self.conn.recv(8)
         if data.decode() == 'TRUE':
             global PID_Deleted
@@ -115,26 +107,20 @@ class App(Frame):
     #Chinh sua xong
     def eventWatchApp(self):
         self.eventDeleteAppProcess()
+        strRev=''
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
-        self.conn.send("SHWPRC".encode())
+        self.conn.send("SHWPRCAPP".encode())
         while True:
             data = self.conn.recv(1024)
             if not data:
                 break
             if data.decode().find('STOPRIGHTNOW')!=-1:
                 break
-            if len(str(data.decode()))!=1 and str(data.decode()).find('ThreadCount')==-1:
-                arr=re.sub(' +', ' ',data.replace(b'\x00', b'').decode('utf-8')).split(' ')
-                chain=''
-                for i in range(0,len(arr)-3,1):
-                    chain+=arr[i]
-                if arr[1]!='ProcessId' and arr[2]!='ThreadCount':
-                    mpApplication[chain]=(str(arr[len(arr)-3]),str(arr[len(arr)-2]))
-                    #self.treeViewProcess.insert("",'end',text=chain,values=(str(arr[len(arr)-3]),str(arr[len(arr)-2])))
-                chain=''
-        for key in mpApplication:
-            self.treeViewProcess.insert("",'end',text=key,values=(mpApplication[key][0],mpApplication[key][1]))
+            strRev+=data.decode()
+        finalAppRunning = strRev.split()
+        for i in range(0,len(finalAppRunning)//3,1):
+            self.treeViewProcess.insert("",'end',text=finalAppRunning[3*i],values=(finalAppRunning[3*i+1],finalAppRunning[3*i+2]))
     #Giu nguyen
     
     def eventStartApp(self):

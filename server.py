@@ -7,6 +7,7 @@ import pyautogui
 import registry
 from winreg import *
 from time import sleep
+import subprocess
 import keyboard #pip install keyboard
 
 mp={
@@ -93,6 +94,14 @@ class Server(object):
                     self.conn.send('STOPRIGHTNOW'.encode())
                     break
                 self.conn.sendall(data.strip().encode())
+        elif Str.decode() == 'SHWPRCAPP':
+            tmp = subprocess.check_output("powershell gps | where {$_.MainWindowTitle} | select Name,Id,@{Name='ThreadCount';Expression={$_.Threads.Count}}")
+            arr = tmp.split()[6:]
+            print(arr)
+            for i in range(0,len(arr)//3,1):
+                plusStr=str(arr[3*i].decode()+' '+arr[3*i+1].decode()+' '+arr[3*i+2].decode()+' ')
+                self.conn.send(plusStr.encode())
+            self.conn.send('STOPRIGHTNOW'.encode())
         elif Str.decode().find('GETVALUE')!=-1:
             arr = Str.decode().split(' ')
             brr = arr[1].split('\\',1)
@@ -127,9 +136,9 @@ class Server(object):
             except:
                 self.conn.send('Failed'.encode())
         elif Str.decode().find('KILLAPP') != -1:
-            name = str(Str.decode())
+            name = str(Str.decode().split()[1])
             try:
-                os.system('taskkill /f /im '+name.split('KILLAPP',1)[1])                
+                subprocess.check_output('powershell Stop-Process -ID '+ name +' -Force')            
                 self.conn.send('TRUE'.encode())
             except:
                 self.conn.send('FALSE'.encode())
@@ -196,7 +205,7 @@ class Server(object):
     ##################################################################################
     def Close(self):
         s.close()
-        close_it=threading.Thread(target=self.root.destroy)
+        close_it=threading.Thread(target=self.root.destroy,daemon=True)
         close_it.start()
 ins=Server()
 mainz=threading.Thread(target=ins.main_form)
