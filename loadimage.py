@@ -1,9 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
-import os
-import time
-import cv2
 # pip install pillow
 from PIL import Image, ImageTk,ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True

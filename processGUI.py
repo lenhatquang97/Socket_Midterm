@@ -28,31 +28,37 @@ class Kill(Frame):
         self.master.wm_title(name)
         self.master.geometry('450x50')
         self.master.mainloop()
-        self.master.destroy()
+        try:
+            self.master.destroy()
+        except:
+            print('No error')
     def sendProcess(self):
-        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.conn.connect((self.IP, self.port_no))
-        self.conn.send(("KILL " + self.pid.get()).encode())
-        data = self.conn.recv(8)
-        if data.decode() == 'TRUE':
-            global PID_Deleted
-            PID_Deleted=self.pid.get()
-            self.master.quit()
-        else:
+        try:
+            self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.conn.connect((self.IP, self.port_no))
+            self.conn.send(("KILL " + self.pid.get()).encode())
+            data = self.conn.recv(8)
+            if data.decode() == 'TRUE':
+                global PID_Deleted
+                PID_Deleted=self.pid.get()
+                self.master.quit()
+        except:
             print("Failed to kill process.")
 class Start(Kill):
     def __init__(self, master,IP,port_no,function):
         super().__init__(master,IP,port_no, function=function)
     def sendProcess(self):
-        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.conn.connect((self.IP, self.port_no))
-        self.conn.send(("START " + self.pid.get()).encode())
-        data = self.conn.recv(8)
-        if data.decode() == 'TRUE':
-            self.master.quit()
-        else:
-            print("Failed to start process.")
-        pass
+        try:
+            self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.conn.connect((self.IP, self.port_no))
+            self.conn.send(("START " + self.pid.get()).encode())
+            data = self.conn.recv(8)
+            if data.decode() == 'TRUE':
+                self.master.quit()
+            else: 
+                print("Failed to start process.")
+        except:
+            pass
 class Process(Frame):
     def __init__(self,master, IP, port_no):
         Frame.__init__(self, master)
@@ -82,9 +88,9 @@ class Process(Frame):
         self.treeViewProcess.column("#0",width=165,anchor=CENTER)
         self.treeViewProcess.column("one",width=165,anchor=CENTER)
         self.treeViewProcess.column("two",width=165,anchor=CENTER)
-        self.treeViewProcess.heading("#0",text='Name Process')
-        self.treeViewProcess.heading("one",text='ID Process')
-        self.treeViewProcess.heading("two",text='Count Threads')
+        self.treeViewProcess.heading("#0",text='Process Name')
+        self.treeViewProcess.heading("one",text='Process ID')
+        self.treeViewProcess.heading("two",text='Threads Count')
 
         #Mau
         #for i in range(0,10,1):

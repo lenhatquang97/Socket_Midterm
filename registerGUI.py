@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import ttk
-import threading
 import socket
 from tkinter.filedialog import askopenfilename
 # pip install pillow
@@ -65,7 +64,6 @@ class RegistryWindow(Frame):
 
         deleteButton = ttk.Button(self.master, text='Xóa',command=self.deleteNotification)
         deleteButton.place(x=380,y=370)
-    #Row 7 lam viec :) 
     def manageRegistryGUIFunction(self,event):
         if str(self.combo.get())=='Get value':
             self.keyText = StringVar()
@@ -120,6 +118,8 @@ class RegistryWindow(Frame):
             self.connection.send(l)
             l = another_f.read(1024)
         another_f.close()
+        self.deleteNotification()
+        self.setNotification(self.connection.recv(1024).decode())
     #Cac ham cai dat
     def browseFunction(self):
         try:
@@ -161,6 +161,7 @@ class RegistryWindow(Frame):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((self.IP, self.port_no))
         self.connection.send(getRegStr.encode())
+        self.deleteNotification()
         self.setNotification(self.connection.recv(1024).decode())
 
     def deleteNotification(self):

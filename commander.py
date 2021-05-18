@@ -1,7 +1,5 @@
 from tkinter import *
 from tkinter import ttk
-import threading
-
 class ShutdownCMD:
     def __init__(self, root):
         self.command = 'SHUTDOWN'

