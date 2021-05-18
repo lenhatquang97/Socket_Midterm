@@ -149,13 +149,13 @@ class RegistryWindow(Frame):
         self.statusEntry.configure(state='disabled')
     def sendRegCommand(self):
         if str(self.combo.get())=='Get value':
-            getRegStr = "GETVALUE " +self.regPathText.get()+ " "+self.keyText.get()
+            getRegStr = "GETVALUE%" +self.regPathText.get()+ "%"+self.keyText.get()
         elif str(self.combo.get())=='Delete value':
-            getRegStr = "DELETEVALUE " +self.regPathText.get()+ " "+self.keyText.get()
+            getRegStr = "DELETEVALUE%" +self.regPathText.get()+ "%"+self.keyText.get()
         elif str(self.combo.get())=='Delete key':
-            getRegStr = "DELETEKEY " +self.regPathText.get()
+            getRegStr = "DELETEKEY%" +self.regPathText.get()
         elif str(self.combo.get())=='Create key':
-            getRegStr = "CREATEKEY " +self.regPathText.get()
+            getRegStr = "CREATEKEY%" +self.regPathText.get()
         elif str(self.combo.get())=='Set value':
             getRegStr = "SETVALUE%" +self.regPathText.get() +"%"+ self.keyText1.get() +"%"+ self.valueText.get() +"%"+ self.comboData.get()
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

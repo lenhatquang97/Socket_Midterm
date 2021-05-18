@@ -18,29 +18,11 @@ mp={
     'HKEY_LOCAL_MACHINE':HKEY_LOCAL_MACHINE
 }
 class Server(object):
-    def main_form(self):
-        """Creates the interface window"""
-        self.root = Tk()
-        self.root.title("Server")
-
-        #mainframe
-        self.mainframe = ttk.Frame(self.root, padding="25 25 50 50")
-        self.mainframe.grid(column=0, row=0, sticky=(N,W,E,S))
-        self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=1)
-        self.root.resizable(FALSE, FALSE)
-
-        #Open server button
-        self.connectButton = ttk.Button(self.mainframe, text='Open', command=self.threadConnect)
-        self.connectButton.grid(column=1, row=1)
-        self.root.mainloop()
-        pass
     def threadConnect(self):
         con=threading.Thread(target=self.Connect)
         con.start()
     def Connect(self):
         port = 1025
-        #addr = '14.230.23.93'
         addr = socket.gethostbyname(socket.gethostname())
         Label(self.mainframe,text=addr+':'+str(port)).grid(column=1,row=2)
         print(addr, port)
@@ -58,6 +40,27 @@ class Server(object):
             if not data:
                 break
             self.magicFunction(data)
+    def main_form(self):
+        """Creates the interface window"""
+        self.root = Tk()
+        self.root.title("Server")
+
+        #mainframe
+        self.mainframe = ttk.Frame(self.root, padding="25 25 50 50")
+        self.mainframe.grid(column=0, row=0, sticky=(N,W,E,S))
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        self.root.resizable(FALSE, FALSE)
+
+        #Open server button
+        self.connectButton = ttk.Button(self.mainframe, text='Open', command=self.threadConnect)
+        self.connectButton.grid(column=1, row=1)
+        self.root.mainloop()
+        try:
+            s.shutdown(2) #Dong ket noi socket
+        except:
+            pass
+    
     #Ham nay nhan lenh tu client
     def magicFunction(self,Str):
         if Str.decode()=='Hello':
@@ -75,15 +78,17 @@ class Server(object):
             except Exception as e:
                 self.conn.send("Invalid command: " + str(e))
         elif Str.decode() == 'CAPSCR':
-            pyautogui.screenshot().save('scr.png')
-            send = open('scr.png','rb')
-            while True:
-                data=send.read(1024)
-                if not data:
-                    break
-                self.conn.sendall(data)
-            send.close()
-        
+            try:
+                pyautogui.screenshot().save('scr.png')
+                send = open('scr.png','rb')
+                while True:
+                    data=send.read(1024)
+                    if not data:
+                        break
+                    self.conn.sendall(data)
+                send.close()
+            except:
+                pass        
         elif Str.decode() == 'SHWPRC':
             #Commands the server to send the file consisting of running processes
             os.system("wmic process get Name, ProcessId, ThreadCount >list.txt")
@@ -104,13 +109,16 @@ class Server(object):
                 self.conn.send(plusStr.encode())
             self.conn.send('STOPRIGHTNOW'.encode())
         elif Str.decode().find('GETVALUE')!=-1:
-            arr = Str.decode().split(' ')
-            brr = arr[1].split('\\',1)
-            self.conn.send(str(registry.getValue(mp[brr[0]],brr[1],arr[2])).encode())
-        elif Str.decode().find('SETVALUE')!=-1:
-            arr = Str.decode().split('%')
-            brr = arr[1].split('\\',1)
             try:
+                arr = Str.decode().split('%')
+                brr = arr[1].split('\\',1)
+                self.conn.send(str(registry.getValue(mp[brr[0]],brr[1],arr[2])).encode())
+            except:
+                self.conn.send('Failed'.encode())
+        elif Str.decode().find('SETVALUE')!=-1:
+            try:
+                arr = Str.decode().split('%')
+                brr = arr[1].split('\\',1)
                 if registry.setValue(mp[brr[0]],brr[1],arr[2],arr[3],arr[4]) == True:
                     self.conn.send('Completed'.encode())
                 else:
@@ -118,25 +126,33 @@ class Server(object):
             except:
                 self.conn.send('Failed'.encode())
         elif Str.decode().find('DELETEVALUE')!=-1:
-            arr = Str.decode().split(' ')
-            brr = arr[1].split('\\',1)
-            if registry.deleteValue(mp[brr[0]],brr[1],arr[2]):
-                self.conn.send('Completed'.encode())
-            else:
+            try:
+                arr = Str.decode().split('%')
+                brr = arr[1].split('\\',1)
+                if registry.deleteValue(mp[brr[0]],brr[1],arr[2]):
+                    self.conn.send('Completed'.encode())
+                else:
+                    self.conn.send('Failed'.encode())
+            except:
                 self.conn.send('Failed'.encode())
         elif Str.decode().find('CREATEKEY')!=-1:
-            arr = Str.decode().split(' ')
-            if registry.createKey(arr[1])==True:
-                self.conn.send('Completed'.encode())
-            else:
+            try:
+                arr = Str.decode().split('%')
+                if registry.createKey(arr[1])==True:
+                    self.conn.send('Completed'.encode())
+                else:
+                    self.conn.send('Failed'.encode())
+            except:
                 self.conn.send('Failed'.encode())
         elif Str.decode().find('DELETEKEY')!=-1:
-            arr = Str.decode().split(' ')
-            if registry.deleteKey(arr[1])==True:
-                self.conn.send('Completed'.encode())
-            else:
+            try:
+                arr = Str.decode().split('%')
+                if registry.deleteKey(arr[1])==True:
+                    self.conn.send('Completed'.encode())
+                else:
+                    self.conn.send('Failed'.encode())
+            except:
                 self.conn.send('Failed'.encode())
-        
         elif Str.decode().find('KILLAPP') != -1:
             name = str(Str.decode().split()[1])
             try:
@@ -217,5 +233,4 @@ mainz=threading.Thread(target=ins.main_form)
 try:
     mainz.start()
 except:
-    ins.Connect()
     pass

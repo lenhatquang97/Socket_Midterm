@@ -1,5 +1,6 @@
 from tkinter import filedialog
 from tkinter import *
+from typing import no_type_check
 from winreg import *
 import subprocess
 import os
@@ -49,6 +50,8 @@ def setValue(default_value,reg_path,name,value,type):
         print(default_value,' ',reg_path,' ',name,' ',value,' ',type)
         winreg.CreateKey(default_value, reg_path)
         registry_key = winreg.OpenKey(default_value, reg_path, 0, winreg.KEY_WRITE)
+        if mpData[type]==winreg.REG_BINARY:
+            value = value.encode()
         winreg.SetValueEx(registry_key, name, 0, mpData[type], value)
         winreg.CloseKey(registry_key)
         return True
@@ -57,9 +60,14 @@ def setValue(default_value,reg_path,name,value,type):
 #Get value entry from registry key
 def getValue(default_value,reg_path,name):
     try:
+        print('Hello')
+        print(reg_path)
         registry_key = winreg.OpenKey(default_value, reg_path, 0, winreg.KEY_READ)
+        
         value, regtype = winreg.QueryValueEx(registry_key, name)
         winreg.CloseKey(registry_key)
+        if regtype ==winreg.REG_BINARY:
+            return value.decode()
         return value
     except WindowsError:
         return None
