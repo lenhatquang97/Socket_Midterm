@@ -113,13 +113,13 @@ class Client(object):
         cmd = 'CAPSCR'
         print(cmd)
         self.sendToServer(cmd)
-        scrshot = open("bKneabBdp53zAl7zOF5t.png", 'wb')
+        scrshot = open("bKneabBdp53zAl7zOF5t.png", 'wb+')
         while True:
             data = self.connection.recv(1024)
-            if len(data) < 1024:
-                scrshot.write(data)
-                break
+            print(len(data))
             scrshot.write(data)
+            if len(data)<1024:
+                break
         ins = loadimage.WindowScreenShot('bKneabBdp53zAl7zOF5t.png',Toplevel(self.root))
         scrThread =threading.Thread(target=ins.loadImg(),daemon=True)
         scrThread.start()
