@@ -9,6 +9,7 @@ from winreg import *
 from time import sleep
 import subprocess
 import keyboard #pip install keyboard
+import re
 
 mp={
     'HKEY_CLASSES_ROOT':HKEY_CLASSES_ROOT,
@@ -91,15 +92,20 @@ class Server(object):
                 pass        
         elif Str.decode() == 'SHWPRC':
             #Commands the server to send the file consisting of running processes
-            os.system("wmic process get Name, ProcessId, ThreadCount >VK6neXBFYwrwsDmbu8ja.txt")
-            send = open('VK6neXBFYwrwsDmbu8ja.txt', 'r')
-            while True:
-                data = send.readline()
-                print(data)
-                if not data:
-                    self.conn.send('STOPRIGHTNOW'.encode())
-                    break
-                self.conn.sendall(data.strip().encode())
+            tmp=subprocess.check_output('wmic process get Name, ProcessId, ThreadCount')
+            arr=[]
+            csv_str=''
+            for p in tmp.split()[3:]:
+                if len(arr)!=0 and re.search('[a-zA-Z]',arr[-1]) and re.search('[a-zA-Z]',str(p.decode())):
+                    arr[-1]=arr[-1]+str(p.decode())
+                else:
+                    arr.append(str(p.decode()))
+            for i in range(0,len(arr),1):
+                if i==len(arr)-1:
+                    csv_str+=arr[i]
+                csv_str+=arr[i]+','
+            self.conn.sendall(csv_str.encode())
+            self.conn.send('STOPRIGHTNOW'.encode())
         elif Str.decode() == 'SHWPRCAPP':
             tmp = subprocess.check_output("powershell gps | where {$_.MainWindowTitle} | select Name,Id,@{Name='ThreadCount';Expression={$_.Threads.Count}}")
             arr = tmp.split()[6:]

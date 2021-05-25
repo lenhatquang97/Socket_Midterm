@@ -3,6 +3,7 @@ from tkinter import ttk
 import threading
 import socket
 from time import sleep
+from typing_extensions import final
 # pip install pillow
 from PIL import Image, ImageTk
 from pyautogui import scroll
@@ -115,22 +116,19 @@ class Process(Frame):
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.conn.connect((self.IP, self.port_no))
         self.conn.send("SHWPRC".encode())
+        final_result=[]
+        csv_str=''
         while True:
             data = self.conn.recv(1024)
             if not data:
                 break
             if data.decode().find('STOPRIGHTNOW')!=-1:
                 break
-            if len(str(data.decode()))!=1 and str(data.decode()).find('ThreadCount')==-1:
-                arr=re.sub(' +', ' ',data.replace(b'\x00', b'').decode('utf-8')).split(' ')
-                print(arr)
-                chain=''
-                for i in range(0,len(arr)-3,1):
-                    chain+=arr[i]
-                if arr[1]!='ProcessId' and arr[2]!='ThreadCount':
-                    self.treeViewProcess.insert("",'end',text=chain,values=(str(arr[len(arr)-3]),str(arr[len(arr)-2])))
-                chain=''
-            #print(data.decode())
+            csv_str+=data.decode()
+        final_result=csv_str.split(',')
+        for i in range(0,len(final_result)//3,1):
+            print(final_result[3*i],' ',final_result[3*i+1],' ',final_result[3*i+2])
+            self.treeViewProcess.insert("",'end',text=final_result[3*i],values=(final_result[3*i+1],final_result[3*i+2]))
     def eventStartProcess(self):
         ins=Start(self.master,self.IP,self.port_no,'START')
         ins.load('Start')
