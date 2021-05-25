@@ -118,7 +118,7 @@ class App(Frame):
             if data.decode().find('STOPRIGHTNOW')!=-1:
                 break
             strRev+=data.decode()
-        finalAppRunning = strRev.split()
+        finalAppRunning = strRev.split(',')
         for i in range(0,len(finalAppRunning)//3,1):
             self.treeViewProcess.insert("",'end',text=finalAppRunning[3*i],values=(finalAppRunning[3*i+1],finalAppRunning[3*i+2]))
     #Giu nguyen

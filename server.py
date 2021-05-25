@@ -109,10 +109,12 @@ class Server(object):
         elif Str.decode() == 'SHWPRCAPP':
             tmp = subprocess.check_output("powershell gps | where {$_.MainWindowTitle} | select Name,Id,@{Name='ThreadCount';Expression={$_.Threads.Count}}")
             arr = tmp.split()[6:]
-            print(arr)
-            for i in range(0,len(arr)//3,1):
-                plusStr=str(arr[3*i].decode()+' '+arr[3*i+1].decode()+' '+arr[3*i+2].decode()+' ')
-                self.conn.send(plusStr.encode())
+            csv_str=''
+            for i in range(0,len(arr),1):
+                if i==len(arr)-1:
+                    csv_str+=str(arr[i].decode())
+                csv_str+=str(arr[i].decode())+','
+            self.conn.sendall(csv_str.encode())
             self.conn.send('STOPRIGHTNOW'.encode())
         elif Str.decode().find('GETVALUE')!=-1:
             try:
